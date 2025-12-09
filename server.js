@@ -139,25 +139,21 @@ app.post('/api/send', async (req, res) => {
 // ----------------------- Serve React build -----------------------
 
 const clientDistPath = path.join(__dirname, 'client', 'dist');
-console.log('clientDistPath =', clientDistPath, 'exists =', fs.existsSync(clientDistPath));
 
-if (fs.existsSync(clientDistPath)) {
-  // Serve static files from React build
-  app.use(express.static(clientDistPath));
+// Serve all static assets (JS, CSS, images) from the React build
+app.use(express.static(clientDistPath));
 
-  // SPA fallback – all non-API routes go to index.html
-  app.get('*', (req, res) => {
-    if (req.path.startsWith('/api')) {
-      return res.status(404).json({ error: 'API route not found' });
-    }
-    res.sendFile(path.join(clientDistPath, 'index.html'));
-  });
-} else {
-  console.warn('client/dist NOT found. Run "npm run build" before using the web UI.');
-}
+// SPA fallback – for any non-API route, send index.html
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  res.sendFile(path.join(clientDistPath, 'index.html'));
+});
 
 // ----------------------- Start server -----------------------
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
